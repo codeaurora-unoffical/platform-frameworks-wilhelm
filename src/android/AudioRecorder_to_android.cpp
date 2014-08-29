@@ -31,6 +31,7 @@ static FILE* gMonitorFp = NULL;
 
 #define KEY_RECORDING_SOURCE_PARAMSIZE  sizeof(SLuint32)
 #define KEY_RECORDING_PRESET_PARAMSIZE  sizeof(SLuint32)
+#define KEY_RECORDING_SESSION_ID_PARAMSIZE  sizeof(SLuint32)
 
 //-----------------------------------------------------------------------------
 // Internal utility functions
@@ -363,7 +364,19 @@ SLresult android_audioRecorder_getConfig(CAudioRecorder* ar, const SLchar *confi
     SLresult result;
 
     assert(NULL != ar && NULL != configKey && NULL != pValueSize);
-    if (strcmp((const char*)configKey, (const char*)SL_ANDROID_KEY_RECORDING_PRESET) == 0) {
+    if (strcmp((const char*)configKey, (const char*)SL_ANDROID_KEY_RECORDING_SESSION_ID) == 0) {
+        // get recording session ID
+        if (NULL == pConfigValue) {
+            result = SL_RESULT_PARAMETER_INVALID;
+        } else if (KEY_RECORDING_SESSION_ID_PARAMSIZE > *pValueSize) {
+            SL_LOGE(ERROR_CONFIG_VALUESIZE_TOO_LOW);
+            result = SL_RESULT_BUFFER_INSUFFICIENT;
+        } else {
+            *(SLuint32*)pConfigValue = ar->mAudioRecord->getSessionId();
+            result = SL_RESULT_SUCCESS;
+        }
+        *pValueSize = KEY_RECORDING_SESSION_ID_PARAMSIZE;
+    } else if (strcmp((const char*)configKey, (const char*)SL_ANDROID_KEY_RECORDING_PRESET) == 0) {
 
         // recording preset
         if (NULL == pConfigValue) {
