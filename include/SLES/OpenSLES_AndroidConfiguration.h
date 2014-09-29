@@ -42,6 +42,10 @@ extern "C" {
 /**   uses the main microphone tuned for audio communications */
 #define SL_ANDROID_RECORDING_PRESET_VOICE_COMMUNICATION ((SLuint32) 0x00000004)
 
+/** Audio recording get session ID (read only) */
+/** Audio recording get session ID key */
+#define SL_ANDROID_KEY_RECORDING_SESSION_ID ((const SLchar*) "androidRecordingSessionId")
+
 /*---------------------------------------------------------------------------*/
 /* Android AudioPlayer configuration                                         */
 /*---------------------------------------------------------------------------*/
