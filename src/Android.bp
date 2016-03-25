@@ -123,7 +123,6 @@ cc_library_shared {
         "android/android_AudioToCbRenderer.cpp",
         "android/android_GenericMediaPlayer.cpp",
         "android/android_GenericPlayer.cpp",
-        "android/android_LocAVPlayer.cpp",
         "android/android_StreamPlayer.cpp",
         "android/android_Effect.cpp",
         "android/util/AacAdtsExtractor.cpp",
@@ -224,7 +223,6 @@ cc_library_shared {
         "libdl",
         "libandroid_runtime",
 
-        "libstagefright_http_support",
     ],
 
     include_dirs: [
