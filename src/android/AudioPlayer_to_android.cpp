@@ -281,7 +281,7 @@ void android_audioPlayer_volumeUpdate(CAudioPlayer* ap)
     if (ap->mAPlayer != 0) {
         ap->mAPlayer->setVolume(leftVol, rightVol);
     } else if (ap->mTrackPlayer != 0) {
-        ap->mTrackPlayer->setSlPlayerVolume(leftVol, rightVol);
+        ap->mTrackPlayer->setPlayerVolume(leftVol, rightVol);
     }
 
     // changes in the AudioPlayer volume must be reflected in the send level:
@@ -1727,7 +1727,7 @@ SLresult android_audioPlayer_realize(CAudioPlayer *pAudioPlayer, SLboolean async
             j_env->ExceptionClear();
             j_env->CallVoidMethod(pAudioPlayer->mAndroidConfiguration.mRoutingProxy,
                                   midRoutingProxy_connect,
-                                  pAudioPlayer->mTrackPlayer->mAudioTrack.get());
+                                  (jlong)pAudioPlayer->mTrackPlayer->mAudioTrack.get());
             if (j_env->ExceptionCheck()) {
                 SL_LOGE("Java exception releasing player routing object.");
                 result = SL_RESULT_INTERNAL_ERROR;
