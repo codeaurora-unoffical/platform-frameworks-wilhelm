@@ -281,7 +281,7 @@ void android_audioPlayer_volumeUpdate(CAudioPlayer* ap)
     if (ap->mAPlayer != 0) {
         ap->mAPlayer->setVolume(leftVol, rightVol);
     } else if (ap->mTrackPlayer != 0) {
-        ap->mTrackPlayer->setSlPlayerVolume(leftVol, rightVol);
+        ap->mTrackPlayer->setPlayerVolume(leftVol, rightVol);
     }
 
     // changes in the AudioPlayer volume must be reflected in the send level:
@@ -1675,8 +1675,8 @@ SLresult android_audioPlayer_realize(CAudioPlayer *pAudioPlayer, SLboolean async
 
         int32_t notificationFrames;
         if ((policy & AUDIO_OUTPUT_FLAG_FAST) != 0) {
-            // negative notificationFrames is the number of notifications (sub-buffers) per track buffer
-            // for details see the explanation at frameworks/av/include/media/AudioTrack.h
+            // negative notificationFrames is the number of notifications (sub-buffers) per track
+            // buffer for details see the explanation at frameworks/av/include/media/AudioTrack.h
             notificationFrames = -pAudioPlayer->mBufferQueue.mNumBuffers;
         } else {
             notificationFrames = 0;
@@ -1727,7 +1727,7 @@ SLresult android_audioPlayer_realize(CAudioPlayer *pAudioPlayer, SLboolean async
             j_env->ExceptionClear();
             j_env->CallVoidMethod(pAudioPlayer->mAndroidConfiguration.mRoutingProxy,
                                   midRoutingProxy_connect,
-                                  pAudioPlayer->mTrackPlayer->mAudioTrack.get());
+                                  (jlong)pAudioPlayer->mTrackPlayer->mAudioTrack.get());
             if (j_env->ExceptionCheck()) {
                 SL_LOGE("Java exception releasing player routing object.");
                 result = SL_RESULT_INTERNAL_ERROR;
@@ -2295,8 +2295,12 @@ void android_audioPlayer_usePlayEventMask(CAudioPlayer *ap) {
     }
 
     if (eventFlags & SL_PLAYEVENT_HEADATMARKER) {
-        ap->mTrackPlayer->mAudioTrack->setMarkerPosition((uint32_t)((((int64_t)pPlayItf->mMarkerPosition
-                * sles_to_android_sampleRate(ap->mSampleRateMilliHz)))/1000));
+        ap->mTrackPlayer->mAudioTrack->setMarkerPosition(
+            (uint32_t) (
+                (int64_t) pPlayItf->mMarkerPosition *
+                sles_to_android_sampleRate(ap->mSampleRateMilliHz) /
+                1000
+            ));
     } else {
         // clear marker
         ap->mTrackPlayer->mAudioTrack->setMarkerPosition(0);
@@ -2359,7 +2363,7 @@ void android_audioPlayer_getPosition(IPlay *pPlayItf, SLmillisecond *pPosMsec) {
     switch (ap->mAndroidObjType) {
 
       case AUDIOPLAYER_FROM_PCM_BUFFERQUEUE:
-        if ((ap->mSampleRateMilliHz == UNKNOWN_SAMPLERATE) || (ap->mTrackPlayer->mAudioTrack == 0)) {
+        if (ap->mSampleRateMilliHz == UNKNOWN_SAMPLERATE || ap->mTrackPlayer->mAudioTrack == 0) {
             *pPosMsec = 0;
         } else {
             uint32_t positionInFrames;
