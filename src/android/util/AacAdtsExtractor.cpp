@@ -15,6 +15,7 @@
  */
 
 #include "sllog.h"
+#include <media/stagefright/MediaBuffer.h>
 #include <media/stagefright/MetaDataUtils.h>
 #include <utils/Log.h>
 
@@ -123,7 +124,7 @@ AacAdtsExtractor::AacAdtsExtractor(const sp<DataSource> &source)
     SL_LOGV("AacAdtsExtractor has found sr=%d channel=%d", sr, channel);
 
     // Never fails
-    mMeta = MakeAACCodecSpecificData(profile, sf_index, channel);
+    MakeAACCodecSpecificData(*mMeta, profile, sf_index, channel);
 
     // Round up and get the duration of each frame
     mFrameDurationUs = (1024 * 1000000ll + (sr - 1)) / sr;
@@ -229,7 +230,7 @@ sp<MetaData> AacAdtsSource::getFormat() {
 
 
 status_t AacAdtsSource::read(
-        MediaBuffer **out, const ReadOptions *options) {
+        MediaBufferBase **out, const ReadOptions *options) {
     *out = NULL;
 
     int64_t seekTimeUs;
@@ -247,7 +248,7 @@ status_t AacAdtsSource::read(
         return ERROR_END_OF_STREAM;
     }
 
-    MediaBuffer *buffer;
+    MediaBufferBase *buffer;
     status_t err = mGroup->acquire_buffer(&buffer);
     if (err != OK) {
         return err;
@@ -265,8 +266,8 @@ status_t AacAdtsSource::read(
     }
 
     buffer->set_range(0, frameSizeWithoutHeader);
-    buffer->meta_data()->setInt64(kKeyTime, mCurrentTimeUs);
-    buffer->meta_data()->setInt32(kKeyIsSyncFrame, 1);
+    buffer->meta_data().setInt64(kKeyTime, mCurrentTimeUs);
+    buffer->meta_data().setInt32(kKeyIsSyncFrame, 1);
 
     mOffset += frameSize;
     mCurrentTimeUs += mFrameDurationUs;
