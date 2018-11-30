@@ -1471,7 +1471,9 @@ SLresult android_audioPlayer_realize(CAudioPlayer *pAudioPlayer, SLboolean async
             policy = AUDIO_OUTPUT_FLAG_NONE;
         }
 
-        pAudioPlayer->mAudioTrack = new android::AudioTrack(
+        pAudioPlayer->mAudioTrack = new android::AudioTrack();
+
+        pAudioPlayer->mAudioTrack->set(
                 pAudioPlayer->mStreamType,                           // streamType
                 sampleRate,                                          // sampleRate
                 sles_to_android_sampleFormat(df_pcm),                // format
@@ -1483,7 +1485,10 @@ SLresult android_audioPlayer_realize(CAudioPlayer *pAudioPlayer, SLboolean async
                 audioTrack_callBack_pullFromBuffQueue,               // callback
                 (void *) pAudioPlayer,                               // user
                 0,     // FIXME find appropriate frame count         // notificationFrame
-                pAudioPlayer->mSessionId);
+                0,                                                   // sharedBuffer
+                true,                                                // threadCanCallJava
+                pAudioPlayer->mSessionId,                            // sessionId
+                android::AudioTrack::TRANSFER_CALLBACK);             // transferType
         android::status_t status = pAudioPlayer->mAudioTrack->initCheck();
         if (status != android::NO_ERROR) {
             SL_LOGE("AudioTrack::initCheck status %u", status);
