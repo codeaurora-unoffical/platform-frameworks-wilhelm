@@ -1960,9 +1960,13 @@ SLresult android_audioPlayer_destroy(CAudioPlayer *pAudioPlayer) {
     SL_LOGV("android_audioPlayer_destroy(%p)", pAudioPlayer);
     switch (pAudioPlayer->mAndroidObjType) {
 
-    case AUDIOPLAYER_FROM_PCM_BUFFERQUEUE: // intended fall-throughk, both types of players
-                                           //   use the TrackPlayerBase for playback
     case AUDIOPLAYER_FROM_URIFD:
+        if (pAudioPlayer->mObject.mEngine->mAudioManager != 0) {
+            pAudioPlayer->mObject.mEngine->mAudioManager->releasePlayer(pAudioPlayer->mPIId);
+        }
+        // intended fall-throughk, both types of players
+        // use the TrackPlayerBase for playback
+    case AUDIOPLAYER_FROM_PCM_BUFFERQUEUE:
         if (pAudioPlayer->mTrackPlayer != 0) {
             pAudioPlayer->mTrackPlayer->destroy();
         }
